@@ -24,7 +24,7 @@ public class PedidoView {
     public void mostrarBienvenida() {
         System.out.println("=========================================");
         System.out.println("  SISTEMA DE PROCESAMIENTO DE PEDIDOS  ");
-        System.out.println("  (Repository + Strategy + Facade + Adapter)");
+        System.out.println("  (Repository + Strategy + Facade + Adapter + Observer)");
         System.out.println("=========================================\n");
     }
     

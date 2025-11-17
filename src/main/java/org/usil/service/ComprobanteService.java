@@ -2,12 +2,13 @@ package org.usil.service;
 
 import org.usil.model.Comprobante;
 import org.usil.model.Pedido;
+import org.usil.observer.PedidoObservable;
 
-
-public class ComprobanteService {
+//Servicio que genera comprobantes y notifica a observadores cuando se genera una factura
+public class ComprobanteService extends PedidoObservable {
 
     public Comprobante generarComprobante(Pedido pedido) {
-        return new Comprobante(
+        Comprobante comprobante = new Comprobante(
             pedido.getNumeroFactura(),
             pedido.getCliente(),
             pedido.getProducto(),
@@ -16,6 +17,11 @@ public class ComprobanteService {
             pedido.getIgv(),
             pedido.getTotal()
         );
+        
+        // Notificar a los observadores que se generó una factura
+        notificarFacturaGenerada(comprobante);
+        
+        return comprobante;
     }
 
     public void mostrarComprobante(Comprobante comprobante) {

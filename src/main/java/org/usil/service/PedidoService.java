@@ -2,9 +2,11 @@ package org.usil.service;
 
 import org.usil.model.Pedido;
 import org.usil.model.Producto;
+import org.usil.observer.PedidoObservable;
 import org.usil.repository.PedidoRepository;
 
-public class PedidoService {
+//Servicio que gestiona pedidos y notifica a observadores cuando se registra un pedido
+public class PedidoService extends PedidoObservable {
 
     private PedidoRepository pedidoRepository;
     
@@ -20,7 +22,14 @@ public class PedidoService {
         producto.setStock(stockActual - cantidadPedida);
 
         // Guardar el pedido usando el repositorio
-        return pedidoRepository.guardar(pedido);
+        boolean guardado = pedidoRepository.guardar(pedido);
+        
+        // Notificar a los observadores que se registró un pedido
+        if (guardado) {
+            notificarPedidoRegistrado(pedido);
+        }
+        
+        return guardado;
     }
 }
 

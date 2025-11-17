@@ -3,6 +3,9 @@ package org.usil.controller;
 import org.usil.adapter.FacturaAdapter;
 import org.usil.facade.PedidoFacade;
 import org.usil.legacy.LegacyBillingSystem;
+import org.usil.observer.ClienteObserver;
+import org.usil.observer.InventarioObserver;
+import org.usil.observer.LogObserver;
 import org.usil.repository.PedidoRepository;
 import org.usil.service.ComprobanteService;
 import org.usil.service.ImpuestoService;
@@ -30,6 +33,19 @@ public class ApplicationController {
 
         LegacyBillingSystem legacySystem = new LegacyBillingSystem();
         FacturaAdapter facturaAdapter = new FacturaAdapter(legacySystem);
+
+        // Registrar observadores en los servicios observables
+        ClienteObserver clienteObserver = new ClienteObserver();
+        InventarioObserver inventarioObserver = new InventarioObserver();
+        LogObserver logObserver = new LogObserver();
+        
+        pedidoService.agregarObserver(clienteObserver);
+        pedidoService.agregarObserver(inventarioObserver);
+        pedidoService.agregarObserver(logObserver);
+        
+        comprobanteService.agregarObserver(clienteObserver);
+        comprobanteService.agregarObserver(inventarioObserver);
+        comprobanteService.agregarObserver(logObserver);
 
         PedidoFacade pedidoFacade = new PedidoFacade(
             stockService,

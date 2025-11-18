@@ -2,23 +2,21 @@ package org.usil.controller;
 
 import org.usil.adapter.FacturaAdapter;
 import org.usil.facade.PedidoFacade;
+import org.usil.facade.ThreadFacade;
 import org.usil.legacy.LegacyBillingSystem;
-import org.usil.observer.ClienteObserver;
-import org.usil.observer.InventarioObserver;
-import org.usil.observer.LogObserver;
 import org.usil.repository.PedidoRepository;
 import org.usil.service.ComprobanteService;
 import org.usil.service.ImpuestoService;
 import org.usil.service.PedidoService;
 import org.usil.service.StockService;
 import org.usil.strategy.IGV18Strategy;
-import org.usil.thread.ThreadManager;
 import org.usil.view.PedidoView;
 
 public class ApplicationController {
     
     private PedidoView view;
-    private ThreadManager threadManager;
+    private ThreadController threadController;
+    private ObserverController observerController;
     
     public ApplicationController() {
         inicializarSistema();
@@ -36,18 +34,9 @@ public class ApplicationController {
         LegacyBillingSystem legacySystem = new LegacyBillingSystem();
         FacturaAdapter facturaAdapter = new FacturaAdapter(legacySystem);
 
-        // Registrar observadores en los servicios observables
-        ClienteObserver clienteObserver = new ClienteObserver();
-        InventarioObserver inventarioObserver = new InventarioObserver();
-        LogObserver logObserver = new LogObserver();
-        
-        pedidoService.agregarObserver(clienteObserver);
-        pedidoService.agregarObserver(inventarioObserver);
-        pedidoService.agregarObserver(logObserver);
-        
-        comprobanteService.agregarObserver(clienteObserver);
-        comprobanteService.agregarObserver(inventarioObserver);
-        comprobanteService.agregarObserver(logObserver);
+        //Configurar observers usando ObserverController
+        observerController = new ObserverController();
+        observerController.configurarObservers(pedidoService, comprobanteService);
 
         PedidoFacade pedidoFacade = new PedidoFacade(
             stockService,
@@ -57,8 +46,8 @@ public class ApplicationController {
             comprobanteService
         );
 
-        // Crear ThreadManager para procesamiento paralelo
-        threadManager = new ThreadManager(
+        //Crear ThreadController para procesamiento paralelo
+        threadController = new ThreadController(
             stockService,
             impuestoService,
             pedidoService,
@@ -66,20 +55,21 @@ public class ApplicationController {
             comprobanteService
         );
         
-        // Configurar procesamiento paralelo en el facade
-        pedidoFacade.configurarProcesamientoParalelo(threadManager);
+        //Configurar procesamiento paralelo en el facade usando ThreadFacade
+        ThreadFacade threadFacade = threadController.getThreadFacade();
+        pedidoFacade.configurarProcesamientoParalelo(threadFacade);
         
-        // Iniciar hilos de procesamiento paralelo
-        threadManager.iniciarHilos();
+        //Iniciar hilos de procesamiento paralelo
+        threadController.iniciarHilos();
 
         PedidoController pedidoController = new PedidoController(pedidoFacade);
 
-        this.view = new PedidoView(pedidoController, pedidoFacade, pedidoRepository, threadManager);
+        this.view = new PedidoView(pedidoController, pedidoFacade, pedidoRepository, threadFacade);
     }
     
     public void finalizar() {
-        if (threadManager != null) {
-            threadManager.detenerHilos();
+        if (threadController != null) {
+            threadController.detenerHilos();
         }
     }
     

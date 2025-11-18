@@ -10,8 +10,6 @@ import org.usil.service.ImpuestoService;
 import org.usil.service.PedidoService;
 import org.usil.service.StockService;
 import org.usil.strategy.ImpuestoStrategy;
-import org.usil.thread.ThreadManager;
-
 
 public class PedidoFacade {
     
@@ -20,7 +18,7 @@ public class PedidoFacade {
     private PedidoService pedidoService;
     private FacturaService facturaService;
     private ComprobanteService comprobanteService;
-    private ThreadManager threadManager;
+    private ThreadFacade threadFacade;
     private boolean usarProcesamientoParalelo;
     
     public PedidoFacade(StockService stockService, 
@@ -36,9 +34,9 @@ public class PedidoFacade {
         this.usarProcesamientoParalelo = false;
     }
     
-    //Configura el ThreadManager para procesamiento paralelo
-    public void configurarProcesamientoParalelo(ThreadManager threadManager) {
-        this.threadManager = threadManager;
+    //Configura el ThreadFacade para procesamiento paralelo
+    public void configurarProcesamientoParalelo(ThreadFacade threadFacade) {
+        this.threadFacade = threadFacade;
         this.usarProcesamientoParalelo = true;
     }
     
@@ -48,12 +46,12 @@ public class PedidoFacade {
     }
 
     public Comprobante procesarPedido(Cliente cliente, Producto producto, int cantidad) {
-        // Si está configurado para procesamiento paralelo, usar hilos
-        if (usarProcesamientoParalelo && threadManager != null) {
+        //Si está configurado para procesamiento paralelo, usar hilos
+        if (usarProcesamientoParalelo && threadFacade != null) {
             System.out.println("[PedidoFacade] Procesando pedido de forma paralela usando hilos");
-            threadManager.procesarPedidoAsync(cliente, producto, cantidad);
-            // Retornar null ya que el procesamiento es asíncrono
-            // El comprobante se generará en los hilos
+            threadFacade.procesarPedidoAsync(cliente, producto, cantidad);
+            //Retornar null ya que el procesamiento es asíncrono
+            //El comprobante se generará en los hilos
             return null;
         }
         

@@ -2,12 +2,12 @@ package org.usil.view;
 
 import org.usil.controller.PedidoController;
 import org.usil.facade.PedidoFacade;
+import org.usil.facade.ThreadFacade;
 import org.usil.model.Comprobante;
 import org.usil.model.Producto;
 import org.usil.repository.PedidoRepository;
 import org.usil.strategy.ExoneradoStrategy;
 import org.usil.strategy.IGV18Strategy;
-import org.usil.thread.ThreadManager;
 
 //Vista del patrón MVC - Responsable de la presentación y entrada de datos
 public class PedidoView {
@@ -15,14 +15,14 @@ public class PedidoView {
     private PedidoController controller;
     private PedidoFacade pedidoFacade;
     private PedidoRepository pedidoRepository;
-    private ThreadManager threadManager;
+    private ThreadFacade threadFacade;
     
     public PedidoView(PedidoController controller, PedidoFacade pedidoFacade, 
-                     PedidoRepository pedidoRepository, ThreadManager threadManager) {
+                     PedidoRepository pedidoRepository, ThreadFacade threadFacade) {
         this.controller = controller;
         this.pedidoFacade = pedidoFacade;
         this.pedidoRepository = pedidoRepository;
-        this.threadManager = threadManager;
+        this.threadFacade = threadFacade;
     }
     
     public void mostrarBienvenida() {
@@ -83,10 +83,10 @@ public class PedidoView {
         
         System.out.println("\n");
         
-        // Esperar a que todos los hilos terminen de procesar
+        //Esperar a que todos los hilos terminen de procesar
         System.out.println("[Concurrencia] Esperando que los hilos completen el procesamiento...");
-        if (threadManager != null) {
-            threadManager.esperarProcesamientoCompleto();
+        if (threadFacade != null) {
+            threadFacade.esperarProcesamientoCompleto();
         }
         
         System.out.println("\n");

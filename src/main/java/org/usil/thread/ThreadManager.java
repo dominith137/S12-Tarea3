@@ -1,5 +1,6 @@
 package org.usil.thread;
 
+import org.usil.controller.ModelController;
 import org.usil.model.Cliente;
 import org.usil.model.Comprobante;
 import org.usil.model.Pedido;
@@ -27,16 +28,17 @@ public class ThreadManager {
                         ImpuestoService impuestoService,
                         PedidoService pedidoService,
                         FacturaService facturaService,
-                        ComprobanteService comprobanteService) {
-        // Inicializar colas thread-safe
+                        ComprobanteService comprobanteService,
+                        ModelController modelController) {
+        //Inicializar colas thread-safe
         this.colaPedidos = new LinkedBlockingQueue<>();
         this.colaPedidosRegistrados = new LinkedBlockingQueue<>();
         this.colaComprobantes = new LinkedBlockingQueue<>();
         
-        // Crear hilos
+        //Crear hilos
         this.hiloProcesadorPedidos = new PedidoProcessorThread(
             colaPedidos, colaPedidosRegistrados, 
-            stockService, impuestoService, pedidoService
+            stockService, impuestoService, pedidoService, modelController
         );
         
         this.hiloGeneradorFacturas = new FacturaGeneratorThread(

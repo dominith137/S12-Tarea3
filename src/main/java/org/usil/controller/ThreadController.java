@@ -18,14 +18,16 @@ public class ThreadController {
                            ImpuestoService impuestoService,
                            PedidoService pedidoService,
                            FacturaService facturaService,
-                           ComprobanteService comprobanteService) {
+                           ComprobanteService comprobanteService,
+                           ModelController modelController) {
         System.out.println("[ThreadController] Creando ThreadManager...");
         this.threadManager = new ThreadManager(
             stockService,
             impuestoService,
             pedidoService,
             facturaService,
-            comprobanteService
+            comprobanteService,
+            modelController
         );
         
         System.out.println("[ThreadController] Creando ThreadFacade...");

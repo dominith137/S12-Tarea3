@@ -1,5 +1,6 @@
 package org.usil.facade;
 
+import org.usil.controller.ModelController;
 import org.usil.model.Cliente;
 import org.usil.model.Comprobante;
 import org.usil.model.Pedido;
@@ -19,18 +20,21 @@ public class PedidoFacade {
     private FacturaService facturaService;
     private ComprobanteService comprobanteService;
     private ThreadFacade threadFacade;
+    private ModelController modelController;
     private boolean usarProcesamientoParalelo;
     
     public PedidoFacade(StockService stockService, 
                        ImpuestoService impuestoService,
                        PedidoService pedidoService,
                        FacturaService facturaService,
-                       ComprobanteService comprobanteService) {
+                       ComprobanteService comprobanteService,
+                       ModelController modelController) {
         this.stockService = stockService;
         this.impuestoService = impuestoService;
         this.pedidoService = pedidoService;
         this.facturaService = facturaService;
         this.comprobanteService = comprobanteService;
+        this.modelController = modelController;
         this.usarProcesamientoParalelo = false;
     }
     
@@ -55,14 +59,17 @@ public class PedidoFacade {
             return null;
         }
         
-        // Procesamiento síncrono tradicional
-        // 1. Validar stock
+        //Procesamiento síncrono tradicional
+        //1. Validar stock
         if (!stockService.validarStock(producto, cantidad)) {
             return null;
         }
         
-        // 2. Crear el pedido
-        Pedido pedido = new Pedido(cliente, producto, cantidad);
+        //2. Crear el pedido usando ModelController
+        Pedido pedido = modelController.crearPedido(cliente, producto, cantidad);
+        if (pedido == null) {
+            return null;
+        }
         
         // 3. Calcular impuestos (subtotal, IGV, total)
         impuestoService.calcularImpuestos(pedido);

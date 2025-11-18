@@ -1,5 +1,6 @@
 package org.usil.thread;
 
+import org.usil.controller.ModelController;
 import org.usil.model.Pedido;
 import org.usil.service.ImpuestoService;
 import org.usil.service.PedidoService;
@@ -14,18 +15,21 @@ public class PedidoProcessorThread extends Thread {
     private StockService stockService;
     private ImpuestoService impuestoService;
     private PedidoService pedidoService;
+    private ModelController modelController;
     private volatile boolean activo = true;
     
     public PedidoProcessorThread(BlockingQueue<PedidoRequest> colaPedidos,
                                 BlockingQueue<Pedido> colaPedidosRegistrados,
                                 StockService stockService,
                                 ImpuestoService impuestoService,
-                                PedidoService pedidoService) {
+                                PedidoService pedidoService,
+                                ModelController modelController) {
         this.colaPedidos = colaPedidos;
         this.colaPedidosRegistrados = colaPedidosRegistrados;
         this.stockService = stockService;
         this.impuestoService = impuestoService;
         this.pedidoService = pedidoService;
+        this.modelController = modelController;
         this.setName("Hilo-Procesador-Pedidos");
     }
     
@@ -40,15 +44,24 @@ public class PedidoProcessorThread extends Thread {
                 System.out.println("[Thread] " + Thread.currentThread().getName() + 
                                  " procesando pedido para: " + request.getCliente().getNombre());
                 
-                // 1. Validar stock
+                //1. Validar stock
                 if (!stockService.validarStock(request.getProducto(), request.getCantidad())) {
                     System.out.println("[Thread] " + Thread.currentThread().getName() + 
                                      " - Stock insuficiente para " + request.getProducto().getNombre());
                     continue;
                 }
                 
-                // 2. Crear el pedido
-                Pedido pedido = new Pedido(request.getCliente(), request.getProducto(), request.getCantidad());
+                //2. Crear el pedido usando ModelController
+                Pedido pedido = modelController.crearPedido(
+                    request.getCliente(), 
+                    request.getProducto(), 
+                    request.getCantidad()
+                );
+                if (pedido == null) {
+                    System.out.println("[Thread] " + Thread.currentThread().getName() + 
+                                     " - Error al crear pedido");
+                    continue;
+                }
                 
                 // 3. Calcular impuestos
                 impuestoService.calcularImpuestos(pedido);

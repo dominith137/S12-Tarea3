@@ -34,6 +34,12 @@ public class ApplicationController {
         LegacyBillingSystem legacySystem = new LegacyBillingSystem();
         FacturaAdapter facturaAdapter = new FacturaAdapter(legacySystem);
 
+        //Crear ModelController para gestión de entidades
+        ModelController modelController = new ModelController();
+
+        //Crear RepositoryController para encapsular acceso al repository
+        RepositoryController repositoryController = new RepositoryController(pedidoRepository);
+
         //Configurar observers usando ObserverController
         observerController = new ObserverController();
         observerController.configurarObservers(pedidoService, comprobanteService);
@@ -43,7 +49,8 @@ public class ApplicationController {
             impuestoService,
             pedidoService,
             facturaAdapter,
-            comprobanteService
+            comprobanteService,
+            modelController
         );
 
         //Crear ThreadController para procesamiento paralelo
@@ -52,7 +59,8 @@ public class ApplicationController {
             impuestoService,
             pedidoService,
             facturaAdapter,
-            comprobanteService
+            comprobanteService,
+            modelController
         );
         
         //Configurar procesamiento paralelo en el facade usando ThreadFacade
@@ -62,9 +70,9 @@ public class ApplicationController {
         //Iniciar hilos de procesamiento paralelo
         threadController.iniciarHilos();
 
-        PedidoController pedidoController = new PedidoController(pedidoFacade);
+        PedidoController pedidoController = new PedidoController(pedidoFacade, modelController);
 
-        this.view = new PedidoView(pedidoController, pedidoFacade, pedidoRepository, threadFacade);
+        this.view = new PedidoView(pedidoController, pedidoFacade, repositoryController, threadFacade, modelController);
     }
     
     public void finalizar() {

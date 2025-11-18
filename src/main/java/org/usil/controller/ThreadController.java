@@ -54,15 +54,5 @@ public class ThreadController {
     public ThreadFacade getThreadFacade() {
         return threadFacade;
     }
-    
-    //Obtiene el ThreadManager directamente (solo si es necesario para casos especiales)
-    public ThreadManager getThreadManager() {
-        return threadManager;
-    }
-    
-    //Verifica si el ThreadController está inicializado correctamente
-    public boolean estaInicializado() {
-        return threadManager != null && threadFacade != null;
-    }
 }
 

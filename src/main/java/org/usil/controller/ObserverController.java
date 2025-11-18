@@ -11,9 +11,6 @@ import org.usil.service.PedidoService;
 public class ObserverController {
     
     private ObserverFacade observerFacade;
-    private ClienteObserver clienteObserver;
-    private InventarioObserver inventarioObserver;
-    private LogObserver logObserver;
     
     public ObserverController() {
         this.observerFacade = new ObserverFacade();
@@ -28,23 +25,18 @@ public class ObserverController {
         
         System.out.println("[ObserverController] Iniciando configuración de observers...");
         
-        //Crear instancias de observers
-        clienteObserver = new ClienteObserver();
-        inventarioObserver = new InventarioObserver();
-        logObserver = new LogObserver();
-        
         //Configurar el facade con los servicios observables
         observerFacade.configurarObserversPorDefecto(pedidoService, comprobanteService);
         
-        //Registrar cada observer en ambos servicios
-        observerFacade.registrarObserverEnPedidoService(pedidoService, clienteObserver);
-        observerFacade.registrarObserverEnComprobanteService(comprobanteService, clienteObserver);
+        //Crear y registrar observers en ambos servicios
+        observerFacade.registrarObserverEnPedidoService(pedidoService, new ClienteObserver());
+        observerFacade.registrarObserverEnComprobanteService(comprobanteService, new ClienteObserver());
         
-        observerFacade.registrarObserverEnPedidoService(pedidoService, inventarioObserver);
-        observerFacade.registrarObserverEnComprobanteService(comprobanteService, inventarioObserver);
+        observerFacade.registrarObserverEnPedidoService(pedidoService, new InventarioObserver());
+        observerFacade.registrarObserverEnComprobanteService(comprobanteService, new InventarioObserver());
         
-        observerFacade.registrarObserverEnPedidoService(pedidoService, logObserver);
-        observerFacade.registrarObserverEnComprobanteService(comprobanteService, logObserver);
+        observerFacade.registrarObserverEnPedidoService(pedidoService, new LogObserver());
+        observerFacade.registrarObserverEnComprobanteService(comprobanteService, new LogObserver());
         
         System.out.println("[ObserverController] Configuración de observers completada");
     }
@@ -52,21 +44,6 @@ public class ObserverController {
     //Obtiene el ObserverFacade para acceso directo si es necesario
     public ObserverFacade getObserverFacade() {
         return observerFacade;
-    }
-    
-    //Obtiene el ClienteObserver
-    public ClienteObserver getClienteObserver() {
-        return clienteObserver;
-    }
-    
-    //Obtiene el InventarioObserver
-    public InventarioObserver getInventarioObserver() {
-        return inventarioObserver;
-    }
-    
-    //Obtiene el LogObserver
-    public LogObserver getLogObserver() {
-        return logObserver;
     }
 }
 

@@ -36,22 +36,23 @@ public class ObserverFacade {
         }
     }
     
+    //Registra un observer en un servicio observable específico
+    public void registrarObserverEnServicio(Observable servicio, Observer observer) {
+        if (servicio != null && observer != null) {
+            servicio.agregarObserver(observer);
+            System.out.println("[ObserverFacade] Observer " + observer.getClass().getSimpleName() + 
+                             " registrado en " + servicio.getClass().getSimpleName());
+        }
+    }
+    
     //Registra un observer solo en el PedidoService
     public void registrarObserverEnPedidoService(PedidoService pedidoService, Observer observer) {
-        if (pedidoService != null && observer != null) {
-            pedidoService.agregarObserver(observer);
-            System.out.println("[ObserverFacade] Observer " + observer.getClass().getSimpleName() + 
-                             " registrado en PedidoService");
-        }
+        registrarObserverEnServicio(pedidoService, observer);
     }
     
     //Registra un observer solo en el ComprobanteService
     public void registrarObserverEnComprobanteService(ComprobanteService comprobanteService, Observer observer) {
-        if (comprobanteService != null && observer != null) {
-            comprobanteService.agregarObserver(observer);
-            System.out.println("[ObserverFacade] Observer " + observer.getClass().getSimpleName() + 
-                             " registrado en ComprobanteService");
-        }
+        registrarObserverEnServicio(comprobanteService, observer);
     }
     
     //Configura los observers por defecto en los servicios especificados

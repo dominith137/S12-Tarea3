@@ -7,6 +7,7 @@ import org.usil.model.Producto;
 import org.usil.repository.PedidoRepository;
 import org.usil.strategy.ExoneradoStrategy;
 import org.usil.strategy.IGV18Strategy;
+import org.usil.thread.ThreadManager;
 
 //Vista del patrón MVC - Responsable de la presentación y entrada de datos
 public class PedidoView {
@@ -14,34 +15,43 @@ public class PedidoView {
     private PedidoController controller;
     private PedidoFacade pedidoFacade;
     private PedidoRepository pedidoRepository;
+    private ThreadManager threadManager;
     
-    public PedidoView(PedidoController controller, PedidoFacade pedidoFacade, PedidoRepository pedidoRepository) {
+    public PedidoView(PedidoController controller, PedidoFacade pedidoFacade, 
+                     PedidoRepository pedidoRepository, ThreadManager threadManager) {
         this.controller = controller;
         this.pedidoFacade = pedidoFacade;
         this.pedidoRepository = pedidoRepository;
+        this.threadManager = threadManager;
     }
     
     public void mostrarBienvenida() {
         System.out.println("=========================================");
         System.out.println("  SISTEMA DE PROCESAMIENTO DE PEDIDOS  ");
-        System.out.println("  (Repository + Strategy + Facade + Adapter + Observer)");
+        System.out.println("  (Repository + Strategy + Facade + Adapter + Observer + Threads)");
         System.out.println("=========================================\n");
+        System.out.println("[Sistema] Procesamiento paralelo activado con múltiples hilos");
+        System.out.println("[Sistema] Los pedidos se procesarán de forma concurrente\n");
     }
     
     public void procesarPedido(String nombreCliente, Producto producto, int cantidad, String nombreEstrategia) {
-        System.out.println("--- Procesando pedido ---");
+        System.out.println("--- Procesando pedido (PARALELO) ---");
         System.out.println("Cliente: " + nombreCliente);
         System.out.println("Producto: " + producto.getNombre());
         System.out.println("Cantidad: " + cantidad);
         System.out.println("Estrategia de Impuesto: " + nombreEstrategia);
+        System.out.println("[Concurrencia] Pedido enviado a cola para procesamiento paralelo");
         System.out.println();
         
         Comprobante comprobante = controller.registrarPedido(nombreCliente, producto, cantidad);
         
-        if (comprobante != null) {
-            pedidoFacade.mostrarComprobante(comprobante);
+        // Con procesamiento paralelo, el comprobante puede ser null inicialmente
+        // Los hilos procesarán el pedido de forma asíncrona
+        if (comprobante == null) {
+            System.out.println("[Concurrencia] Pedido en proceso por hilos paralelos...");
+            System.out.println("[Concurrencia] Los observadores y hilos trabajarán en paralelo\n");
         } else {
-            System.out.println("Error: No hay stock suficiente o la cantidad es inválida\n");
+            pedidoFacade.mostrarComprobante(comprobante);
         }
     }
     
@@ -73,6 +83,13 @@ public class PedidoView {
         
         System.out.println("\n");
         
+        // Esperar a que todos los hilos terminen de procesar
+        System.out.println("[Concurrencia] Esperando que los hilos completen el procesamiento...");
+        if (threadManager != null) {
+            threadManager.esperarProcesamientoCompleto();
+        }
+        
+        System.out.println("\n");
         mostrarResumenRepositorio();
         
         System.out.println("\n=========================================");

@@ -10,6 +10,7 @@ import org.usil.service.ImpuestoService;
 import org.usil.service.PedidoService;
 import org.usil.service.StockService;
 import org.usil.strategy.ImpuestoStrategy;
+import org.usil.thread.ThreadManager;
 
 
 public class PedidoFacade {
@@ -19,6 +20,8 @@ public class PedidoFacade {
     private PedidoService pedidoService;
     private FacturaService facturaService;
     private ComprobanteService comprobanteService;
+    private ThreadManager threadManager;
+    private boolean usarProcesamientoParalelo;
     
     public PedidoFacade(StockService stockService, 
                        ImpuestoService impuestoService,
@@ -30,6 +33,13 @@ public class PedidoFacade {
         this.pedidoService = pedidoService;
         this.facturaService = facturaService;
         this.comprobanteService = comprobanteService;
+        this.usarProcesamientoParalelo = false;
+    }
+    
+    //Configura el ThreadManager para procesamiento paralelo
+    public void configurarProcesamientoParalelo(ThreadManager threadManager) {
+        this.threadManager = threadManager;
+        this.usarProcesamientoParalelo = true;
     }
     
     //Permite elegir qué estrategia de impuestos usar antes de procesar el pedido
@@ -38,6 +48,16 @@ public class PedidoFacade {
     }
 
     public Comprobante procesarPedido(Cliente cliente, Producto producto, int cantidad) {
+        // Si está configurado para procesamiento paralelo, usar hilos
+        if (usarProcesamientoParalelo && threadManager != null) {
+            System.out.println("[PedidoFacade] Procesando pedido de forma paralela usando hilos");
+            threadManager.procesarPedidoAsync(cliente, producto, cantidad);
+            // Retornar null ya que el procesamiento es asíncrono
+            // El comprobante se generará en los hilos
+            return null;
+        }
+        
+        // Procesamiento síncrono tradicional
         // 1. Validar stock
         if (!stockService.validarStock(producto, cantidad)) {
             return null;

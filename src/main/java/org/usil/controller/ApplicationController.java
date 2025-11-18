@@ -12,11 +12,13 @@ import org.usil.service.ImpuestoService;
 import org.usil.service.PedidoService;
 import org.usil.service.StockService;
 import org.usil.strategy.IGV18Strategy;
+import org.usil.thread.ThreadManager;
 import org.usil.view.PedidoView;
 
 public class ApplicationController {
     
     private PedidoView view;
+    private ThreadManager threadManager;
     
     public ApplicationController() {
         inicializarSistema();
@@ -55,9 +57,30 @@ public class ApplicationController {
             comprobanteService
         );
 
+        // Crear ThreadManager para procesamiento paralelo
+        threadManager = new ThreadManager(
+            stockService,
+            impuestoService,
+            pedidoService,
+            facturaAdapter,
+            comprobanteService
+        );
+        
+        // Configurar procesamiento paralelo en el facade
+        pedidoFacade.configurarProcesamientoParalelo(threadManager);
+        
+        // Iniciar hilos de procesamiento paralelo
+        threadManager.iniciarHilos();
+
         PedidoController pedidoController = new PedidoController(pedidoFacade);
 
-        this.view = new PedidoView(pedidoController, pedidoFacade, pedidoRepository);
+        this.view = new PedidoView(pedidoController, pedidoFacade, pedidoRepository, threadManager);
+    }
+    
+    public void finalizar() {
+        if (threadManager != null) {
+            threadManager.detenerHilos();
+        }
     }
     
     public void iniciar() {
